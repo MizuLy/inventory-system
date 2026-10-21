@@ -36,9 +36,7 @@ public class CategoryServiceImpl implements CategoryService {
   @Override
   @Transactional(readOnly = true)
   public CategoryResponse getCategoryById(UUID id) {
-    Category category = findOrThrow(id);
-
-    return res(category);
+    return res(findOrThrow(id));
   }
 
   @Override
