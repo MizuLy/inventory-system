@@ -2,6 +2,7 @@ name: mysql
 services:
   mysql:
     image: mysql:8
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpass
     ports:
