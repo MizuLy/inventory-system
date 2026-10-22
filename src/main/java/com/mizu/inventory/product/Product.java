@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.mizu.inventory.category.Category;
+import com.mizu.inventory.suppliers.Supplier;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -59,6 +60,10 @@ public class Product {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "category_id", nullable = false)
   private Category category;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "supplier_id")
+  private Supplier supplier;
 
   @CreationTimestamp
   @Column(name = "created_at", updatable = false)

@@ -41,6 +41,12 @@ public class ProductController {
     return productService.getAllProducts(pageable);
   }
 
+  @GetMapping("/supplier-products/{supplierId}")
+  public Page<ProductResponse> getAllProductBySupplier(@PathVariable UUID supplierId,
+      @ParameterObject @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable page) {
+    return productService.getAllProductsBySupplier(page, supplierId);
+  }
+
   @GetMapping("/low-stock")
   public Page<ProductResponse> getLowStockProduct(
       @ParameterObject @PageableDefault(size = 10, sort = "quantity") Pageable pageable) {

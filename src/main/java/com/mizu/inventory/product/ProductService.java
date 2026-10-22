@@ -13,6 +13,8 @@ public interface ProductService {
 
   Page<ProductResponse> getAllProducts(Pageable pageable);
 
+  Page<ProductResponse> getAllProductsBySupplier(Pageable page, UUID supplierId);
+
   Page<ProductResponse> getLowStockProducts(Pageable pageable);
 
   ProductResponse getProductById(UUID id);

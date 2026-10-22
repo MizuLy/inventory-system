@@ -34,4 +34,6 @@ public class ProductRequest {
 
   @NotNull
   private UUID categoryId;
+
+  private UUID supplierId;
 }

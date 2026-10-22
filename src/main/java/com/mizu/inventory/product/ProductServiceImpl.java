@@ -13,6 +13,8 @@ import com.mizu.inventory.category.Category;
 import com.mizu.inventory.category.CategoryRepository;
 import com.mizu.inventory.product.dto.ProductRequest;
 import com.mizu.inventory.product.dto.ProductResponse;
+import com.mizu.inventory.suppliers.Supplier;
+import com.mizu.inventory.suppliers.SupplierRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,12 +23,24 @@ import lombok.RequiredArgsConstructor;
 public class ProductServiceImpl implements ProductService {
   private final ProductRepository productRepository;
   private final CategoryRepository categoryRepository;
+  private final SupplierRepository supplierRepository;
 
   @Override
   @Transactional
   public ProductResponse createProduct(ProductRequest dto) {
     Category category = categoryRepository.findById(dto.getCategoryId())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
+
+    Supplier supplier = null;
+
+    if (dto.getSupplierId() != null) {
+      supplier = supplierRepository.findById(dto.getSupplierId())
+          .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Supplier not found"));
+
+      if (!supplier.getIsActive()) {
+        throw new ResponseStatusException(HttpStatus.CONFLICT, "Supplier is inactive");
+      }
+    }
 
     String sku;
 
@@ -42,6 +56,7 @@ public class ProductServiceImpl implements ProductService {
     product.setQuantity(dto.getQuantity());
     product.setLowStockThreshold(dto.getLowStockThreshold());
     product.setCategory(category);
+    product.setSupplier(supplier);
 
     Product saved = productRepository.saveAndFlush(product);
     return res(saved);
@@ -51,6 +66,16 @@ public class ProductServiceImpl implements ProductService {
   @Transactional(readOnly = true)
   public Page<ProductResponse> getAllProducts(Pageable pageable) {
     return productRepository.findAll(pageable).map(this::res);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<ProductResponse> getAllProductsBySupplier(Pageable pageable, UUID supplierId) {
+    if (!supplierRepository.existsById(supplierId)) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Supplier not found");
+    }
+
+    return productRepository.findBySupplierId(supplierId, pageable).map(this::res);
   }
 
   @Override
@@ -79,15 +104,31 @@ public class ProductServiceImpl implements ProductService {
   public ProductResponse updateProduct(UUID id, ProductRequest dto) {
     Product product = findOrThrow(id);
 
+    Category category = categoryRepository.findById(dto.getCategoryId())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
+
+    Supplier supplier = null;
+
+    if (dto.getSupplierId() != null) {
+      supplier = supplierRepository.findById(dto.getSupplierId())
+          .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Supplier not found"));
+
+      // Only reject an inactive supplier when it's being newly assigned, so products
+      // whose supplier was deactivated later can still be edited.
+      boolean changed = product.getSupplier() == null
+          || !product.getSupplier().getId().equals(supplier.getId());
+      if (changed && !supplier.getIsActive()) {
+        throw new ResponseStatusException(HttpStatus.CONFLICT, "Supplier is inactive");
+      }
+    }
+
     product.setName(dto.getName());
     product.setDescription(dto.getDescription());
     product.setPrice(dto.getPrice());
     product.setQuantity(dto.getQuantity());
     product.setLowStockThreshold(dto.getLowStockThreshold());
-
-    Category category = categoryRepository.findById(dto.getCategoryId())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
     product.setCategory(category);
+    product.setSupplier(supplier);
 
     Product saved = productRepository.saveAndFlush(product);
     return res(saved);
@@ -117,6 +158,7 @@ public class ProductServiceImpl implements ProductService {
         p.getQuantity(),
         p.getLowStockThreshold(),
         p.getCategory().getName(),
+        p.getSupplier() != null ? p.getSupplier().getName() : null,
         p.getCreatedAt(),
         p.getUpdatedAt());
   }

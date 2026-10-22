@@ -17,4 +17,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
   boolean existsBySku(String sku);
 
   Optional<Product> findBySku(String sku);
+
+  boolean existsBySupplierId(UUID supplierId);
+
+  Page<Product> findBySupplierId(UUID supplierId, Pageable pageable);
 }
