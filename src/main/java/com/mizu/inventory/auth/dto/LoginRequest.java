@@ -1,0 +1,16 @@
+package com.mizu.inventory.auth.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.Data;
+
+@Data
+public class LoginRequest {
+  @NotBlank
+  @Size(max = 255)
+  private String email;
+
+  @NotBlank
+  @Size(max = 255)
+  private String password;
+}
