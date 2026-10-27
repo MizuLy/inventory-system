@@ -15,7 +15,7 @@ public class ProductRequest {
 
   @NotBlank
   @Size(max = 255)
-  private String name;
+  private String productName;
 
   @Size(max = 500)
   private String description;

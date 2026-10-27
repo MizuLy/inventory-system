@@ -40,8 +40,8 @@ public class Product {
   @Column(name = "sku", nullable = false, length = 20, unique = true)
   private String sku;
 
-  @Column(name = "name", nullable = false, length = 255)
-  private String name;
+  @Column(name = "product_name", nullable = false, length = 255)
+  private String productName;
 
   @Column(name = "description", columnDefinition = "TEXT")
   private String description;
