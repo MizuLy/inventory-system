@@ -14,6 +14,7 @@ import com.mizu.inventory.category.CategoryRepository;
 import com.mizu.inventory.product.dto.ProductRequest;
 import com.mizu.inventory.product.dto.ProductResponse;
 import com.mizu.inventory.suppliers.Supplier;
+import com.mizu.inventory.stock_movement.StockMovementService;
 import com.mizu.inventory.suppliers.SupplierRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class ProductServiceImpl implements ProductService {
   private final ProductRepository productRepository;
   private final CategoryRepository categoryRepository;
   private final SupplierRepository supplierRepository;
+  private final StockMovementService stockMovementService;
 
   @Override
   @Transactional
@@ -53,12 +55,13 @@ public class ProductServiceImpl implements ProductService {
     product.setProductName(dto.getProductName());
     product.setDescription(dto.getDescription());
     product.setPrice(dto.getPrice());
-    product.setQuantity(dto.getQuantity());
+    product.setQuantity(dto.getQuantity() != null ? dto.getQuantity() : 0);
     product.setLowStockThreshold(dto.getLowStockThreshold());
     product.setCategory(category);
     product.setSupplier(supplier);
 
     Product saved = productRepository.saveAndFlush(product);
+    stockMovementService.recordInitialStock(saved);
     return res(saved);
   }
 
@@ -125,7 +128,7 @@ public class ProductServiceImpl implements ProductService {
     product.setProductName(dto.getProductName());
     product.setDescription(dto.getDescription());
     product.setPrice(dto.getPrice());
-    product.setQuantity(dto.getQuantity());
+    // quantity is intentionally not updated here: it only changes via stock movements
     product.setLowStockThreshold(dto.getLowStockThreshold());
     product.setCategory(category);
     product.setSupplier(supplier);

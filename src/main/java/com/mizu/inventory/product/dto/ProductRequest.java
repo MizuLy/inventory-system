@@ -24,7 +24,7 @@ public class ProductRequest {
   @DecimalMin("0.00")
   private BigDecimal price;
 
-  @NotNull
+  // opening stock, used on create only; later changes go through stock movements
   @Min(0)
   private Integer quantity;
 

@@ -44,6 +44,9 @@ public class StockMovement {
   @Column(name = "quantity_change", nullable = false)
   private Integer quantityChange;
 
+  @Column(name = "quantity_after")
+  private Integer quantityAfter;
+
   @Enumerated(EnumType.STRING)
   @Column(name = "reason", nullable = false)
   private StockReason reason;

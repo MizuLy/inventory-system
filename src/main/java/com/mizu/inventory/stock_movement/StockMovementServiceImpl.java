@@ -47,11 +47,30 @@ public class StockMovementServiceImpl implements StockMovementService {
     StockMovement sm = StockMovement.builder()
         .product(product)
         .quantityChange(dto.getQuantityChange())
+        .quantityAfter(newQty)
         .reason(dto.getReason())
         .descriptiveReason(dto.getDescriptiveReason())
         .createdBy(currentUser)
         .build();
     return res(stockMovementRepository.save(sm));
+  }
+
+  @Override
+  @Transactional
+  public void recordInitialStock(Product product) {
+    int qty = product.getQuantity();
+    if (qty <= 0) {
+      return;
+    }
+
+    stockMovementRepository.save(StockMovement.builder()
+        .product(product)
+        .quantityChange(qty)
+        .quantityAfter(qty)
+        .reason(StockReason.ADJUSTMENT)
+        .descriptiveReason("Initial stock")
+        .createdBy(currentUser())
+        .build());
   }
 
   @Override
@@ -93,6 +112,7 @@ public class StockMovementServiceImpl implements StockMovementService {
         sm.getProduct().getId(),
         sm.getProduct().getProductName(),
         sm.getQuantityChange(),
+        sm.getQuantityAfter(),
         sm.getReason(),
         sm.getDescriptiveReason(),
         sm.getCreatedBy().getId(),

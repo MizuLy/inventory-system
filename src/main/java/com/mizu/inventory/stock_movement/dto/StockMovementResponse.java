@@ -15,6 +15,7 @@ public class StockMovementResponse {
   private UUID productId;
   private String productName;
   private Integer quantityChange;
+  private Integer quantityAfter;
   private StockReason reason;
   private String descriptiveReason;
   private UUID createdBy;
